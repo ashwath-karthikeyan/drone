@@ -1,32 +1,18 @@
-import time, cv2
-from threading import Thread
+import cv2
+import numpy as np
 from djitellopy import Tello
 
-tello = Tello()
+drone = Tello()  # declaring drone object
+drone.connect()
+drone.streamon()  # start camera streaming
 
-tello.connect()
+while True:
+    frame = drone.get_frame_read().frame  # capturing frame from drone
 
-keepRecording = True
-tello.streamon()
-frame_read = tello.get_frame_read()
+    cv2.imshow('Video', frame)  # show corrected frame on the display
 
-def videoRecorder():
-    # create a VideoWrite object, recoring to ./video.avi
-    # 创建一个VideoWrite对象，存储画面至./video.avi
-    height, width, _ = frame_read.frame.shape
-    video = cv2.VideoWriter('video.mp4', cv2.VideoWriter_fourcc(*'XVID'), 30, (width, height))
+    if cv2.waitKey(1) & 0xFF == ord('q'):  # quit from script
+        break
 
-    while keepRecording:
-        video.write(frame_read.frame)
-        time.sleep(1 / 30)
-
-    video.release()
-
-# we need to run the recorder in a seperate thread, otherwise blocking options
-#  would prevent frames from getting added to the video
-# 我们需要在另一个线程中记录画面视频文件，否则其他的阻塞操作会阻止画面记录
-recorder = Thread(target=videoRecorder)
-recorder.start()
-
-keepRecording = False
-recorder.join()
+cv2.destroyAllWindows()
+drone.streamoff()
