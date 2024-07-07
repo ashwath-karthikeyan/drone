@@ -4,8 +4,7 @@ import cv2
 # Paths to the model weights and the image
 MODEL_WEIGHT_PATH = 'weights.onnx'
 # IMAGE_PATH = 'image.jpg'
-IMAGE_PATH = 'box.jpg'
-
+IMAGE_PATH = 'box_real.jpeg'
 
 # Initialize the YOLO model with the converted model
 model = YOLO(MODEL_WEIGHT_PATH, task='detect')

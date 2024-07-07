@@ -1,23 +1,22 @@
 import cv2
 import numpy as np
-from djitellopy import Tello
 from ultralytics import YOLO
 
 # Paths to the model weights
 MODEL_WEIGHT_PATH = 'weights.onnx'
-CONFIDENCE_THRESHOLD = 0.85 
+CONFIDENCE_THRESHOLD = 0.8  # Set your desired confidence threshold here
 
-# Initialize the drone
-drone = Tello()
-drone.connect()
-drone.streamon()
+# Initialize the camera
+cap = cv2.VideoCapture(0)
 
 # Initialize the YOLO model
 model = YOLO(MODEL_WEIGHT_PATH, task='detect')
 
 while True:
-    # Capture frame from drone
-    frame = drone.get_frame_read().frame
+    # Capture frame from the camera
+    ret, frame = cap.read()
+    if not ret:
+        break
     
     # Run the model with confidence threshold
     output = model(frame, conf=CONFIDENCE_THRESHOLD)
@@ -40,4 +39,4 @@ while True:
         break
 
 cv2.destroyAllWindows()
-drone.streamoff()
+cap.release()
