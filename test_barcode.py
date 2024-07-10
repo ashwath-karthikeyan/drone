@@ -8,4 +8,4 @@ def detect_barcode(image_path):
 
 barcodes = detect_barcode('barcode.png')
 for barcode in barcodes:
-    print(barcode.data.decode('utf-8'))
+    print(barcode.data.decode('utf-8')) 
