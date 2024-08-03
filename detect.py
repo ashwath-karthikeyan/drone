@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 from djitellopy import Tello
 from ultralytics import YOLO
+from pyzbar import pyzbar
 
 # Paths to the model weights
 MODEL_WEIGHT_PATH = 'weights.onnx'
@@ -17,7 +18,9 @@ model = YOLO(MODEL_WEIGHT_PATH, task='detect')
 
 while True:
     # Capture frame from drone
-    frame = drone.get_frame_read().frame
+    raw_frame = drone.get_frame_read().frame
+
+    frame = cv2.cvtColor(raw_frame, cv2.COLOR_BGR2RGB)
     
     # Run the model with confidence threshold
     output = model(frame, conf=CONFIDENCE_THRESHOLD)
