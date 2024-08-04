@@ -3,6 +3,8 @@ import numpy as np
 from djitellopy import Tello
 from ultralytics import YOLO
 from pyzbar import pyzbar
+import threading
+from pynput import keyboard
 
 # Paths to the model weights
 MODEL_WEIGHT_PATH = 'weights.onnx'
@@ -19,6 +21,50 @@ model = YOLO(MODEL_WEIGHT_PATH, task='detect')
 def detect_barcode(image):
     barcodes = pyzbar.decode(image)
     return barcodes
+
+def hover():
+    drone.send_rc_control(0, 0, 0, 0)
+
+def on_press(key):
+    try:
+        if key.char == 'w':
+            print("Move forward")
+            drone.move_forward(30)
+        elif key.char == 'a':
+            print("Move left")
+            drone.move_left(30)
+        elif key.char == 's':
+            print("Move back")
+            drone.move_back(30)
+        elif key.char == 'd':
+            print("Move right")
+            drone.move_right(30)
+        elif key.char == 't':
+            print("Take off")
+            drone.takeoff()
+            threading.Timer(2.0, hover).start()  # Hover after 2 seconds
+        elif key.char == 'l':
+            print("Land")
+            drone.land()
+    except AttributeError:
+        if key == keyboard.Key.up:
+            print("Move up")
+            drone.move_up(30)
+        elif key == keyboard.Key.down:
+            print("Move down")
+            drone.move_down(30)
+        elif key == keyboard.Key.left:
+            print("Rotate counter clockwise")
+            drone.rotate_counter_clockwise(30)
+        elif key == keyboard.Key.right:
+            print("Rotate clockwise")
+            drone.rotate_clockwise(30)
+        elif key == keyboard.Key.esc:
+            return False
+
+# Start the listener thread for keyboard input
+listener = keyboard.Listener(on_press=on_press)
+listener.start()
 
 barcode_detected = False
 barcode_text = ""
@@ -62,5 +108,9 @@ if barcode_detected:
     cv2.imshow('Barcode Detected', blank_image)
     cv2.waitKey(0)
 
-cv2.destroyAllWindows()
 drone.streamoff()
+drone.land()
+cv2.destroyAllWindows()
+
+# Ensure the listener thread ends
+listener.stop()
